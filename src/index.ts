@@ -1,12 +1,13 @@
 import icon from './icon'
 import app from './app.vue'
+import pkg from '../package.json'
 
 export const info = {
-    version: "1.0.0", // 版本号，引入package.json的version
-    name: "示例应用", // 中文必须修改
-    enName: "ExampleApp", // 英文名必须修改
-    description: "metools示例应用组件", // 描述，不小于10个字符。打包时引入package.json的description
-    author: "Jiawei", // 作者，引入package.json的author
+    version: pkg.version, // 版本号，引入package.json的version
+    name: '飞机大战', // 中文必须修改
+    enName: pkg.name, // 英文名必须修改
+    description: pkg.description, // 描述，不小于10个字符。打包时引入package.json的description
+    author: pkg.author, // 作者，引入package.json的author
     icon: icon, // 应用图标，必须存在
 }
 
