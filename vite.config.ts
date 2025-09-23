@@ -30,12 +30,21 @@ export default defineConfig({
             '@': resolve(__dirname, 'src')
         }
     },
+    assetsInclude: ['**/*.svg'],
     build: {
         lib: {
             entry: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
             name: packageJson.name,
             formats: ['es'],
             cssFileName: "index"
+        },
+        rollupOptions: {
+            external: ['vue'],
+            output: {
+                globals: {
+                    vue: 'Vue'
+                }
+            }
         }
     }
 })

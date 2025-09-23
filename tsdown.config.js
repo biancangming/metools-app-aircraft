@@ -15,8 +15,8 @@ export default defineConfig([
       minify: {
         mangle: true,
         compress: true,
-        removeWhitespace: true,
       },
     },
+    external: ['@/assets/images/*.svg'],
   },
 ])

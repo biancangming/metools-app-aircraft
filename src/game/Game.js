@@ -2,10 +2,11 @@
  * 飞机大战游戏核心类
  * 基于HTML5 Canvas的简洁游戏架构
  */
-import playerPng from '@/assets/images/player.svg'
-import enemyPng from '@/assets/images/enemy.svg'
-import bulletPng from '@/assets/images/bullet.svg'
-import enemyBulletPng from '@/assets/images/enemy-bullet.svg'
+// 使用相对路径导入SVG文件作为URL
+const playerPng = new URL('../assets/images/player.svg', import.meta.url).href
+const enemyPng = new URL('../assets/images/enemy.svg', import.meta.url).href
+const bulletPng = new URL('../assets/images/bullet.svg', import.meta.url).href
+const enemyBulletPng = new URL('../assets/images/enemy-bullet.svg', import.meta.url).href
 export class Game {
   constructor(canvas) {
     this.canvas = canvas
