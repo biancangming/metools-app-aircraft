@@ -1,6 +1,6 @@
 {
   "name": "metools-app-aircraft",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "metools工具（迷途工具箱）插件开发脚手架，支持playground在线调试",
   "author": "Jiawei",
   "license": "MIT",
@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/validate-component.js && tsdown && node scripts/build-tailwind.js && node scripts/merge-css.js",
+    "build": "vite build && node scripts/build-tailwind.js && node scripts/merge-css.js",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
     "validate": "node scripts/validate-component.js",

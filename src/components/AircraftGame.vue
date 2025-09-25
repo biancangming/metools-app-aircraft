@@ -1,23 +1,41 @@
 <template>
   <div class="aircraft-game">
-    <canvas 
-      ref="gameCanvas" 
-      class="game-canvas"
-    ></canvas>
+    <canvas ref="gameCanvas" class="game-canvas"></canvas>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { Game } from '@/game/Game.js'
 
-// 响应式数据
+// 定义响应式变量
 const gameCanvas = ref(null)
 let game = null
+let resizeObserver = null // ResizeObserver实例
 
-// 组件挂载时初始化游戏
-onMounted(async () => {
-  if (gameCanvas.value) {
+/**
+ * 初始化游戏实例
+ * 确保DOM完全挂载后再初始化canvas，并设置自适应尺寸
+ */
+const initGame = async () => {
+  // 等待DOM更新完成
+  await new Promise(resolve => {
+    setTimeout(()=>{
+      resolve()
+    }, 500)
+  })
+  
+  // 双重检查canvas元素是否存在
+  // gameCanvas.value = document.querySelector('.game-canvas')
+  if (!gameCanvas.value) {
+    console.error('Canvas元素未找到，无法初始化游戏')
+    return
+  }
+  
+  try {
+    // 设置canvas自适应父级元素大小
+    resizeCanvas()
+    
     // 创建游戏实例
     game = new Game(gameCanvas.value)
     
@@ -26,7 +44,129 @@ onMounted(async () => {
     
     // 开始渲染循环（显示菜单）
     game.render()
+    
+    // 设置ResizeObserver（如果在onMounted中未设置）
+     if (!resizeObserver && gameCanvas.value.parentElement) {
+        resizeObserver = new ResizeObserver((entries) => {
+          // 使用requestAnimationFrame确保在下一帧执行，避免ResizeObserver循环警告
+          requestAnimationFrame(() => {
+            resizeCanvas()
+          })
+        })
+        
+        // 观察父元素的大小变化
+        resizeObserver.observe(gameCanvas.value.parentElement)
+      }
+    
+    console.log('游戏初始化成功')
+  } catch (error) {
+    console.error('游戏初始化失败:', error)
   }
+}
+
+/**
+ * 设置canvas自适应父级元素大小，支持高DPI屏幕
+ */
+const resizeCanvas = () => {
+  if (!gameCanvas.value) return
+  
+  const container = gameCanvas.value.parentElement
+  if (!container) return
+  
+  // 获取设备像素比，确保在高DPI屏幕上清晰显示
+  const dpr = window.devicePixelRatio || 1
+  
+  // 获取父级元素的实际尺寸
+  const containerRect = container.getBoundingClientRect()
+  const containerWidth = containerRect.width
+  const containerHeight = containerRect.height
+  
+  // 设置canvas的显示尺寸（CSS尺寸）
+  gameCanvas.value.style.width = '100%'
+  gameCanvas.value.style.height = '100%'
+  
+  // 设置canvas的实际分辨率，保持16:9的宽高比
+  const aspectRatio = 16 / 9
+  let displayWidth, displayHeight
+  
+  if (containerWidth / containerHeight > aspectRatio) {
+    // 容器更宽，以高度为准
+    displayHeight = Math.min(containerHeight, 600)
+    displayWidth = displayHeight * aspectRatio
+  } else {
+    // 容器更高，以宽度为准
+    displayWidth = Math.min(containerWidth, 800)
+    displayHeight = displayWidth / aspectRatio
+  }
+  
+  // 设置canvas的实际像素尺寸（考虑设备像素比）
+  const canvasWidth = displayWidth * dpr
+  const canvasHeight = displayHeight * dpr
+  
+  gameCanvas.value.width = canvasWidth
+  gameCanvas.value.height = canvasHeight
+  
+  // 设置canvas的CSS显示尺寸
+  gameCanvas.value.style.width = displayWidth + 'px'
+  gameCanvas.value.style.height = displayHeight + 'px'
+  
+  // 获取2D上下文并重新设置缩放
+  const ctx = gameCanvas.value.getContext('2d')
+  if (ctx) {
+    // 重置变换矩阵，避免累积缩放
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    // 应用设备像素比缩放
+    ctx.scale(dpr, dpr)
+  }
+  
+  // 如果游戏实例已存在，更新游戏尺寸并立即重绘
+  if (game) {
+    game.width = displayWidth  // 游戏逻辑使用显示尺寸
+    game.height = displayHeight
+    game.dpr = dpr  // 传递设备像素比给游戏实例
+    
+    // 立即触发一次渲染，避免内容消失
+    game.render()
+  }
+}
+
+// 组件挂载时初始化游戏
+onMounted(() => {
+  // 使用setTimeout确保在下一个事件循环中执行
+  setTimeout(initGame, 0)
+  
+  // 使用ResizeObserver监听父元素大小变化
+  if (gameCanvas.value && gameCanvas.value.parentElement) {
+    resizeObserver = new ResizeObserver((entries) => {
+      // 使用requestAnimationFrame确保在下一帧执行，避免ResizeObserver循环警告
+      requestAnimationFrame(() => {
+        resizeCanvas()
+      })
+    })
+    
+    // 观察父元素的大小变化
+    resizeObserver.observe(gameCanvas.value.parentElement)
+  }
+  
+  // 保留window resize监听作为备用
+  window.addEventListener('resize', resizeCanvas)
+})
+
+// 组件卸载时清理资源
+onUnmounted(() => {
+  if (game && game.animationId) {
+    cancelAnimationFrame(game.animationId)
+    game = null
+  }
+  
+  // 清理ResizeObserver
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
+  
+  // 移除window事件监听器
+  window.removeEventListener('resize', resizeCanvas)
 })
 
 </script>
@@ -34,7 +174,7 @@ onMounted(async () => {
 <style scoped>
 .aircraft-game {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,14 +190,9 @@ onMounted(async () => {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   background: #0a0a2e;
   outline: none;
-}
-
-/* 响应式设计 */
-@media (max-width: 900px) {
-  .game-canvas {
-    width: 100%;
-    max-width: 600px;
-    height: auto;
-  }
+  /* 移除固定尺寸，让canvas自适应父级元素 */
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 </style>

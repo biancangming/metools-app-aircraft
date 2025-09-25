@@ -4,6 +4,12 @@ declare module '*.vue' {
   export default component
 }
 
+// 添加PNG图片模块声明
+declare module '*.png' {
+  const src: string
+  export default src
+}
+
 // 添加完整的 Vue 模块类型声明
 declare module 'vue' {
   import { App, CreateAppFunction } from '@vue/runtime-core'

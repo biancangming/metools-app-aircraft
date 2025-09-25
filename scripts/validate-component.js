@@ -15,16 +15,44 @@ function validateExport() {
   try {
     const content = fs.readFileSync(indexPath, 'utf-8')
     
-    const requiredExports = [
-      'export const info',
-      'export default'
+    // 检查必要的导入
+    const requiredImports = [
+      'import icon from',
+      'import app from',
+      'import pkg from'
     ]
     
-    for (const exportItem of requiredExports) {
-      if (!content.includes(exportItem)) {
-        console.error(`错误: index.ts 中缺少必要的导出: ${exportItem}`)
+    for (const importItem of requiredImports) {
+      if (!content.includes(importItem)) {
+        console.error(`错误: index.ts 中缺少必要的导入: ${importItem}`)
         process.exit(1)
       }
+    }
+    
+    // 检查info对象的必要字段
+    const requiredInfoFields = [
+      'version: pkg.version',
+      'name:',
+      'enName: pkg.name',
+      'description: pkg.description',
+      'author: pkg.author',
+      'icon: icon'
+    ]
+    
+    for (const field of requiredInfoFields) {
+      if (!content.includes(field)) {
+        console.error(`错误: index.ts 中缺少必要的info字段: ${field}`)
+        process.exit(1)
+      }
+    }
+    
+    // 检查默认导出格式
+    if (!content.includes('export default {') || 
+        !content.includes('entry: app') || 
+        !content.includes('...info')) {
+      console.error('错误: index.ts 中缺少正确的默认导出格式')
+      console.error('期望格式: export default { entry: app, ...info }')
+      process.exit(1)
     }
     
     console.log('导出信息验证通过')
