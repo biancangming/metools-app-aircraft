@@ -6,16 +6,6 @@
 
 <script setup lang="ts">
 import AircraftGame from './components/AircraftGame.vue'
-
-// 定义 info 对象的类型
-interface Info {
-  version: string
-  name: string
-  enName: string
-  description: string
-  author: string
-  icon: string
-}
 </script>
 
 <style scoped>

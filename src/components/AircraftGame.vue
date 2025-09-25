@@ -1,18 +1,18 @@
 <template>
   <div class="aircraft-game">
-    <canvas ref="gameCanvas" class="game-canvas"></canvas>
+    <canvas class="game-canvas" ref="gameCanvasRef"></canvas>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { Game } from '@/game/Game.js'
+import pkg from "../../package.json"
 
 // 定义响应式变量
-const gameCanvas = ref(null)
+const gameCanvasRef = ref(null) // 可编辑的canvas引用
 let game = null
 let resizeObserver = null // ResizeObserver实例
-
 /**
  * 初始化游戏实例
  * 确保DOM完全挂载后再初始化canvas，并设置自适应尺寸
@@ -24,10 +24,10 @@ const initGame = async () => {
       resolve()
     }, 500)
   })
-  
-  // 双重检查canvas元素是否存在
-  // gameCanvas.value = document.querySelector('.game-canvas')
-  if (!gameCanvas.value) {
+  const root = document.querySelector(pkg.name).shadowRoot;
+  // 检查useTemplateRef获取的canvas元素是否存在
+  gameCanvasRef.value = root.querySelector('.game-canvas')
+  if (!gameCanvasRef.value) {
     console.error('Canvas元素未找到，无法初始化游戏')
     return
   }
@@ -37,7 +37,7 @@ const initGame = async () => {
     resizeCanvas()
     
     // 创建游戏实例
-    game = new Game(gameCanvas.value)
+    game = new Game(gameCanvasRef.value)
     
     // 等待图片加载完成后开始渲染
     await game.loadImages()
@@ -46,7 +46,7 @@ const initGame = async () => {
     game.render()
     
     // 设置ResizeObserver（如果在onMounted中未设置）
-     if (!resizeObserver && gameCanvas.value.parentElement) {
+     if (!resizeObserver && gameCanvasRef.value.parentElement) {
         resizeObserver = new ResizeObserver((entries) => {
           // 使用requestAnimationFrame确保在下一帧执行，避免ResizeObserver循环警告
           requestAnimationFrame(() => {
@@ -55,7 +55,7 @@ const initGame = async () => {
         })
         
         // 观察父元素的大小变化
-        resizeObserver.observe(gameCanvas.value.parentElement)
+        resizeObserver.observe(gameCanvasRef.value.parentElement)
       }
     
     console.log('游戏初始化成功')
@@ -68,9 +68,9 @@ const initGame = async () => {
  * 设置canvas自适应父级元素大小，支持高DPI屏幕
  */
 const resizeCanvas = () => {
-  if (!gameCanvas.value) return
+  if (!gameCanvasRef.value) return
   
-  const container = gameCanvas.value.parentElement
+  const container = gameCanvasRef.value.parentElement
   if (!container) return
   
   // 获取设备像素比，确保在高DPI屏幕上清晰显示
@@ -82,8 +82,8 @@ const resizeCanvas = () => {
   const containerHeight = containerRect.height
   
   // 设置canvas的显示尺寸（CSS尺寸）
-  gameCanvas.value.style.width = '100%'
-  gameCanvas.value.style.height = '100%'
+  gameCanvasRef.value.style.width = '100%'
+  gameCanvasRef.value.style.height = '100%'
   
   // 设置canvas的实际分辨率，保持16:9的宽高比
   const aspectRatio = 16 / 9
@@ -103,15 +103,15 @@ const resizeCanvas = () => {
   const canvasWidth = displayWidth * dpr
   const canvasHeight = displayHeight * dpr
   
-  gameCanvas.value.width = canvasWidth
-  gameCanvas.value.height = canvasHeight
+  gameCanvasRef.value.width = canvasWidth
+  gameCanvasRef.value.height = canvasHeight
   
   // 设置canvas的CSS显示尺寸
-  gameCanvas.value.style.width = displayWidth + 'px'
-  gameCanvas.value.style.height = displayHeight + 'px'
+  gameCanvasRef.value.style.width = displayWidth + 'px'
+  gameCanvasRef.value.style.height = displayHeight + 'px'
   
   // 获取2D上下文并重新设置缩放
-  const ctx = gameCanvas.value.getContext('2d')
+  const ctx = gameCanvasRef.value.getContext('2d')
   if (ctx) {
     // 重置变换矩阵，避免累积缩放
     ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -136,7 +136,7 @@ onMounted(() => {
   setTimeout(initGame, 0)
   
   // 使用ResizeObserver监听父元素大小变化
-  if (gameCanvas.value && gameCanvas.value.parentElement) {
+  if (gameCanvasRef.value && gameCanvasRef.value.parentElement) {
     resizeObserver = new ResizeObserver((entries) => {
       // 使用requestAnimationFrame确保在下一帧执行，避免ResizeObserver循环警告
       requestAnimationFrame(() => {
@@ -145,7 +145,7 @@ onMounted(() => {
     })
     
     // 观察父元素的大小变化
-    resizeObserver.observe(gameCanvas.value.parentElement)
+    resizeObserver.observe(gameCanvasRef.value.parentElement)
   }
   
   // 保留window resize监听作为备用
