@@ -12,6 +12,25 @@
 </head>
 <body>
   <div id="app"></div>
+  <div id="custom-component-container"></div>
   <script type="module" src="src/main.ts"></script>
+  <script type="module">
+    // 动态读取package.json并创建自定义元素
+    import pkg from '../package.json' assert { type: 'json' };
+    
+    // 等待自定义元素注册完成
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const container = document.getElementById('custom-component-container');
+        if (container && pkg.name) {
+          // 创建动态的自定义元素
+          const customElement = document.createElement(pkg.name);
+          container.appendChild(customElement);
+          
+          console.log(`动态创建了自定义元素: <${pkg.name}></${pkg.name}>`);
+        }
+      }, 100); // 稍微延迟确保自定义元素已注册
+    });
+  </script>
 </body>
 </html>
