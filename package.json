@@ -1,29 +1,20 @@
 {
   "name": "metools-app-aircraft",
-  "version": "1.0.1",
-  "description": "metools工具（迷途工具箱）插件开发脚手架，支持playground在线调试",
+  "version": "1.0.3",
+  "description": "飞机大战Vue应用",
   "author": "Jiawei",
   "license": "MIT",
   "type": "module",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
   "files": [
-    "dist"
+    "dist",
+    "*.png",
+    "*.jpg"
   ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/build-tailwind.js && node scripts/merge-css.js",
+    "build": "vite build",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit",
-    "validate": "node scripts/validate-component.js",
-    "deploy:github": "node scripts/deploy-github.js"
+    "type-check": "tsc --noEmit"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.13",
@@ -49,8 +40,8 @@
   },
   "keywords": [
     "vue3",
-    "component",
-    "metools",
-    "plugin"
+    "game",
+    "aircraft",
+    "webapp"
   ]
 }

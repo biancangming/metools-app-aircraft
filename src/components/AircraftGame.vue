@@ -24,9 +24,7 @@ const initGame = async () => {
       resolve()
     }, 500)
   })
-  const root = document.querySelector(pkg.name).shadowRoot;
-  // 检查useTemplateRef获取的canvas元素是否存在
-  gameCanvasRef.value = root.querySelector('.game-canvas')
+  
   if (!gameCanvasRef.value) {
     console.error('Canvas元素未找到，无法初始化游戏')
     return
